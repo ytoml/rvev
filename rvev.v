@@ -1,5 +1,8 @@
 module main
 
+import cpu
+
 fn main() {
-	println('Hello World!')
+	c := cpu.Cpu{}
+	println('${c.x_regs}')
 }
