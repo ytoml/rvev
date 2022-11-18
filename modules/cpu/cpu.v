@@ -1,18 +1,9 @@
 module cpu
 
-import dram
-import bus
-
-pub const (
-	n_regs = 32
-)
+import consts
 
 const (
-	page_size      = 4096
-	half_word      = 16
-	word           = 32
-	double_word    = 64
-	pointer_to_dtb = 0x1020
+	n_regs = 32
 )
 
 pub struct XRegisters {
@@ -22,8 +13,8 @@ mut:
 
 fn xregs_init() XRegisters {
 	mut r := [cpu.n_regs]u64{}
-	r[2] = bus.dram_base + dram.dram_size
-	r[11] = cpu.pointer_to_dtb
+	r[2] = consts.dram_base + consts.dram_size
+	r[11] = consts.pointer_to_dtb
 	return XRegisters{r}
 }
 
@@ -53,7 +44,7 @@ fn xreg_name(i int) string {
 
 pub fn (r XRegisters) str() string {
 	// regnames
-	abi := [cpu.n_regs]string{init: xreg_name(it)}
+	abi := [n_regs]string{init: xreg_name(it)}
 	mut display := 'XRegisters\n'
 	for i, name in abi {
 		x := 'x${i}'
