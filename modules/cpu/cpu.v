@@ -44,7 +44,7 @@ fn xreg_name(i int) string {
 
 pub fn (r XRegisters) str() string {
 	// regnames
-	abi := [n_regs]string{init: xreg_name(it)}
+	abi := [cpu.n_regs]string{init: xreg_name(it)}
 	mut display := 'XRegisters\n'
 	for i, name in abi {
 		x := 'x${i}'
