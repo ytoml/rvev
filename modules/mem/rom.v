@@ -34,8 +34,8 @@ pub fn (r Rom) load(addr u64, size u8) !u64 {
 }
 
 fn get_dtb() ![]u8 {
-	create_dts() or { return err }
-	compile_dts() or { return err }
+	create_dts()!
+	compile_dts()!
 	return read_dtb()
 }
 
