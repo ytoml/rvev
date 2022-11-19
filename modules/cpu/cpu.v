@@ -1,5 +1,6 @@
 module cpu
 
+import bus { Bus }
 import consts
 
 const (
@@ -105,6 +106,7 @@ pub struct Cpu {
 pub mut:
 	x_regs XRegisters = xregs_init()
 	f_regs FRegisters
+	bus    Bus
 	pc     u64
 	idle   bool
 	// for debug
@@ -116,10 +118,25 @@ pub fn new() Cpu {
 	return Cpu{}
 }
 
-pub fn (mut cpu Cpu) exec() !u64 {
-	return 0
+pub fn (mut c Cpu) fetch(size u8) !u64 {
+	match size {
+		consts.half_word | consts.word {
+			return c.bus.load(c.pc, size)
+		}
+		else {
+			return error('CPU: Invalid fetch size')
+		}
+	}
 }
 
-pub fn (mut cpu Cpu) exec_compressed(inst u64) !u64 {
-	return 0
+fn decode(inst u32) Instruction {
+	panic('TODO: decode')
+}
+
+pub fn (mut c Cpu) exec() !u64 {
+	panic('TODO: exec')
+}
+
+pub fn (mut c Cpu) exec_compressed(inst u64) !u64 {
+	panic('TODO: exec_compressed')
 }
