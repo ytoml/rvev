@@ -5,6 +5,8 @@ import consts
 
 const byte_mask = 0xff
 
+struct DramBase {}
+
 pub struct Dram {
 mut:
 	mem []u8
@@ -25,11 +27,11 @@ fn (d Dram) name() string {
 }
 
 pub fn (mut d Dram) store(addr u64, value u64, size u8) ! {
-	mut m := Memory(d)
+	mut m := MemoryWrite(d)
 	return m.store(addr, value, size)
 }
 
 pub fn (d Dram) load(addr u64, size u8) !u64 {
-	m := Memory(d)
+	m := MemoryRead(d)
 	return m.load(addr, size)
 }

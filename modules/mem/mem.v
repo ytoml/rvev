@@ -18,10 +18,11 @@ interface MemoryRead {
 	mem []u8
 }
 
-interface Memory {
-	MemoryWrite
-	MemoryRead
-}
+// This leads to C error (compiler bug): https://github.com/vlang/v/issues/16483
+// interface Memory {
+// 	MemoryWrite
+// 	MemoryRead
+// }
 
 // size unit is bit
 fn (mut m MemoryWrite) store(addr u64, value u64, size u8) ! {
