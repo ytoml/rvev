@@ -12,14 +12,14 @@ mut:
 	r [n_regs]u64
 }
 
-fn xregs_init() XRegisters {
+fn x_regs_init() XRegisters {
 	mut r := [cpu.n_regs]u64{}
 	r[2] = consts.dram_base + consts.dram_size
 	r[11] = consts.pointer_to_dtb
 	return XRegisters{r}
 }
 
-pub fn (mut r XRegisters) read(i u64) u64 {
+pub fn (r XRegisters) read(i u64) u64 {
 	return r.r[i]
 }
 
@@ -60,7 +60,7 @@ mut:
 	r [n_regs]f64
 }
 
-pub fn (mut r FRegisters) read(i u64) f64 {
+pub fn (r FRegisters) read(i u64) f64 {
 	return r.r[i]
 }
 
@@ -103,8 +103,9 @@ pub struct Cpu {
 	enable_paging   bool
 	page_table      u64
 	reservation_set []u64
+	debug           bool
 pub mut:
-	x_regs XRegisters = xregs_init()
+	x_regs XRegisters = x_regs_init()
 	f_regs FRegisters
 	bus    Bus
 	pc     u64
@@ -118,6 +119,31 @@ pub fn new() Cpu {
 	return Cpu{}
 }
 
+fn (mut c Cpu) debug(name string, inst Instruction) {
+	if c.debug {
+		c.inst_counter[name]++
+		fmt := inst_format(inst)
+		eprintln('[DEBUG] instruction decode ok: ${name} (${fmt})')
+		eprintln('[DEBUG] cpu state: ${c}')
+	}
+}
+
+fn (mut c Cpu) x_write(i u64, val u64) {
+	c.x_regs.write(i, val)
+}
+
+fn (c Cpu) x_read(i u64) u64 {
+	return c.x_regs.read(i)
+}
+
+fn (mut c Cpu) f_write(i u64, val f64) {
+	c.f_regs.write(i, val)
+}
+
+fn (c Cpu) f_read(i u64) f64 {
+	return c.f_regs.read(i)
+}
+
 pub fn (mut c Cpu) fetch(size u8) !u64 {
 	match size {
 		consts.half_word | consts.word {
@@ -129,8 +155,85 @@ pub fn (mut c Cpu) fetch(size u8) !u64 {
 	}
 }
 
-fn decode(inst u32) Instruction {
-	panic('TODO: decode')
+fn bad_inst(expected string, inst Instruction) ! {
+	fmt := inst_format(inst)
+	return error('Bad inst (${expected}: ${fmt})')
+}
+
+fn bad_inst_generic(inst Instruction) ! {
+	return bad_inst('Unkown', inst)
+}
+
+fn inst_format(i Instruction) string {
+	f7 := i.funct7()
+	rs2 := i.rs2()
+	rs1 := i.rs1()
+	f3 := i.funct3()
+	rd := i.rd()
+	op := i.opcode()
+	return '${f7:07b}_${rs2:05b}_${rs1:05b}_${f3:03b}_${rd:05b}_${op:07b}'
+}
+
+fn (mut c Cpu) decode(raw_inst u32) !Instruction {
+	inst := InstructionBase{raw_inst}
+	match inst.opcode() {
+		0b000_0011 {}
+		0b000_0111 {
+			panic('TODO: decode D extensions')
+		}
+		0b000_1111 {
+			f := Fence{IType{inst}}
+			f.verify()!
+			match inst.funct3() {
+				0b000 {
+					c.debug('fence', inst)
+				}
+				0b001 {
+					c.debug('fence.i', inst)
+				}
+				else {
+					bad_inst('fence', inst)!
+				}
+			}
+		}
+		0b010_0011 {
+			i := IType{inst}
+			match inst.funct3() {
+				0b000 {
+					c.debug('addi', inst)
+				}
+				0b010 {}
+				0b011 {}
+				0b100 {}
+				0b110 {}
+				0b111 {}
+				0b001 {
+					c.debug('slli', inst)
+				}
+				0b101 {
+					l := LogicalShift{i}
+					match inst.funct7() {
+						0b000_0000 {
+							c.debug('srli', inst)
+						}
+						0b010_0000 {
+							c.debug('srai', inst)
+						}
+						else {
+							bad_inst('srli|srai', inst)!
+						}
+					}
+				}
+				else {
+					return error('fatal: funct3 bug (${inst.funct3()})')
+				}
+			}
+		}
+		else {
+			panic('TODO: decode')
+		}
+	}
+	return inst
 }
 
 pub fn (mut c Cpu) exec() !u64 {

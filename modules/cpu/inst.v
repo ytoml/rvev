@@ -16,6 +16,7 @@ interface Instruction {
 	rs1() u8
 	rs2() u8
 	funct3() u8
+	funct7() u8
 }
 
 struct InstructionBase {
@@ -80,6 +81,12 @@ fn (f Fence) pred() u8 {
 
 fn (f Fence) succ() u8 {
 	return u8((f.i >> 24) & cpu.b4mask)
+}
+
+fn (f Fence) verify() ! {
+	if f.rd() != 0 || f.rs1() != 0 || (f.i >> 28) != 0 {
+		return bad_inst('fence', f)
+	}
 }
 
 struct RType {
