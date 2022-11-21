@@ -4,6 +4,7 @@ const (
 	b3mask      = u8(0b111)
 	b4mask      = u8(0b1111)
 	b5mask      = u8(0b11111)
+	b6mask      = u8(0b111111)
 	b7mask      = u8(0b1111111)
 	b10mask     = u32(0x3ff)
 	b11mask     = u32(0x7ff)
@@ -55,12 +56,17 @@ fn (i IType) imm() u16 {
 	return u16(i.i >> 20)
 }
 
+fn (i IType) imm_sext() u64 {
+	return u64(i64(int(i.i)) >> 20)
+}
+
 struct LogicalShift {
 	IType
 }
 
 fn (l LogicalShift) shamt() u8 {
-	return l.rs2()
+	// Note that shamt for RV64I is 6 bits while 5 bits for RV32I
+	return u8(l.i >> 20 & cpu.b6mask)
 }
 
 struct Csr {
@@ -87,6 +93,10 @@ fn (f Fence) verify() ! {
 	if f.rd() != 0 || f.rs1() != 0 || (f.i >> 28) != 0 {
 		return bad_inst('fence', f)
 	}
+}
+
+struct DType {
+	IType
 }
 
 struct RType {
