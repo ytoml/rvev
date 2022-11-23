@@ -8,6 +8,7 @@ const (
 	b7mask      = u8(0b1111111)
 	b10mask     = u32(0x3ff)
 	b11mask     = u32(0x7ff)
+	upper7mask  = u32(0xfe00_0000)
 	upper20mask = u32(0xffff_f000)
 )
 
@@ -115,8 +116,8 @@ struct SType {
 	InstructionBase
 }
 
-fn (s SType) imm() u16 {
-	return s.funct7() | s.rd()
+fn (s SType) imm_sext() u64 {
+	return u64(i64(int(s.i & cpu.upper7mask) >> 20) | ((s.i >> 7) & cpu.b4mask))
 }
 
 struct BType {

@@ -335,6 +335,52 @@ fn (mut c Cpu) decode(raw_inst u32) !Instruction {
 				}
 			}
 		}
+		0b010_0011 {
+			// RV32I
+			s := SType{inst}
+			addr := c.x_read(inst.rs1()) + s.imm_sext()
+			rs2_val := c.x_read(inst.rs2())
+			match inst.funct3() {
+				0b000 {
+					c.debug('sb', inst)
+					c.bus.store(addr, rs2_val, consts.byte_)!
+				}
+				0b001 {
+					c.debug('sh', inst)
+					c.bus.store(addr, rs2_val, consts.half_word)!
+				}
+				0b010 {
+					c.debug('sw', inst)
+					c.bus.store(addr, rs2_val, consts.word)!
+				}
+				0b011 {
+					c.debug('sd', inst)
+					c.bus.store(addr, rs2_val, consts.double_word)!
+				}
+				else {
+					bad_inst('store', inst)!
+				}
+			}
+		}
+		0b010_0111 {
+			// RV32F / RV64F
+			s := SType{inst}
+			addr := c.x_read(inst.rs1()) + s.imm_sext()
+			rs2_val := c.f_read(inst.rs2())
+			match inst.funct3() {
+				0b010 {
+					c.debug('fsw', inst)
+					c.bus.store(addr, u64(math.f32_bits(f32(rs2_val))), consts.word)!
+				}
+				0b011 {
+					c.debug('fsd', inst)
+					c.bus.store(addr, math.f64_bits(rs2_val), consts.double_word)!
+				}
+				else {
+					bad_inst('f store', inst)!
+				}
+			}
+		}
 		0b001_0111 {
 			return error('auipc: RV32I is not supported')
 		}
