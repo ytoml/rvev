@@ -381,6 +381,124 @@ fn (mut c Cpu) decode(raw_inst u32) !Instruction {
 				}
 			}
 		}
+		0b101_0011 {
+			// TODO: CSR check
+			rs1_val := c.f_read(inst.rs1())
+			rs2_val := c.f_read(inst.rs2())
+			rd := inst.rd()
+			match inst.funct7() {
+				0b000_0000 {
+					c.debug('fadd.s', inst)
+					val := f32(rs1_val) + f32(rs2_val)
+					c.f_write(rd, val)
+				}
+				0b000_0001 {
+					c.debug('fadd.d', inst)
+					val := rs1_val + rs2_val
+					c.f_write(rd, val)
+				}
+				0b000_0100 {
+					c.debug('fsub.s', inst)
+					val := f32(rs1_val) - f32(rs2_val)
+					c.f_write(rd, val)
+				}
+				0b000_0101 {
+					c.debug('fsub.d', inst)
+					val := rs1_val - rs2_val
+					c.f_write(rd, val)
+				}
+				0b000_1000 {
+					c.debug('fmul.s', inst)
+					val := f32(rs1_val) * f32(rs2_val)
+					c.f_write(rd, val)
+				}
+				0b000_1001 {
+					c.debug('fmul.d', inst)
+					val := rs1_val * rs2_val
+					c.f_write(rd, val)
+				}
+				0b000_1100 {
+					c.debug('fdiv.s', inst)
+					val := f32(rs1_val) / f32(rs2_val)
+					c.f_write(rd, val)
+				}
+				0b000_1101 {
+					c.debug('fdiv.d', inst)
+					val := rs1_val / rs2_val
+					c.f_write(rd, val)
+				}
+				0b001_0000 {
+					match inst.funct3() {
+						0b000 {
+							c.debug('fsgnj.s', inst)
+						}
+						0b001 {
+							c.debug('fsgnjn.s', inst)
+						}
+						0b010 {
+							c.debug('fsgnjx.s', inst)
+						}
+						else {
+							bad_inst('fsgnj.s', inst)!
+						}
+					}
+				}
+				0b001_0001 {
+					match inst.funct3() {
+						0b000 {
+							c.debug('fsgnj.d', inst)
+						}
+						0b001 {
+							c.debug('fsgnjn.d', inst)
+						}
+						0b010 {
+							c.debug('fsgnjx.d', inst)
+						}
+						else {
+							bad_inst('fsgnj.d', inst)!
+						}
+					}
+				}
+				0b001_0100 {
+					match inst.funct3() {
+						0b000 {
+							c.debug('fmin.s', inst)
+						}
+						0b001 {
+							c.debug('fmax.s', inst)
+						}
+						else {
+							bad_inst('(fmin|fmax).s', inst)!
+						}
+					}
+				}
+				0b001_0101 {
+					match inst.funct3() {
+						0b000 {
+							c.debug('fmin.d', inst)
+						}
+						0b001 {
+							c.debug('fmax.d', inst)
+						}
+						else {
+							bad_inst('(fmin|fmax).d', inst)!
+						}
+					}
+				}
+				0b010_0000 {
+					c.debug('fcvt.s.d', inst)
+				}
+				0b010_0001 {
+					c.debug('fcvt.d.s', inst)
+				}
+				0b010_1100 {
+					c.debug('fcvt.d.s', inst)
+				}
+				else {
+					bad_inst('F extension', inst)!
+				}
+			}
+		}
 		0b001_0111 {
 			return error('auipc: RV32I is not supported')
 		}
