@@ -117,7 +117,7 @@ struct SType {
 }
 
 fn (s SType) imm_sext() u64 {
-	return u64(i64(int(s.i & cpu.upper7mask) >> 20) | ((s.i >> 7) & cpu.b4mask))
+	return u64(i64(int(s.i & cpu.upper7mask) >> 20) | ((s.i >> 7) & cpu.b5mask))
 }
 
 struct BType {
