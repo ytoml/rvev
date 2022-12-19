@@ -124,10 +124,15 @@ struct BType {
 	InstructionBase
 }
 
+fn (b BType) imm() u32 {
+	return u32(int(b.i & (1 << 31)) >> 19) | (b.i & (1 << 7)) << 4 | (b.i >> 20) & (cpu.b6mask << 5) | (b.i >> 7) & (cpu.b4mask << 1) & ~1
+}
+
 struct JType {
 	InstructionBase
 }
 
 fn (j JType) imm() u32 {
-	return (j.i & u32(0x8000_0000)) >> 11 | j.i & u32(0x000f_f000) | ((j.i >> 20) & 0b1) << 11 | (j.i >> 20) & (cpu.b10mask << 1)
+	// TODO: sign extend
+	return u32(int(j.i & u32(0x8000_0000)) >> 11) | j.i & u32(0x000f_f000) | ((j.i >> 20) & 0b1) << 11 | (j.i >> 20) & (cpu.b10mask << 1)
 }

@@ -28,3 +28,15 @@ fn test_stype_imm() {
 		assert s.imm_sext() == ans
 	}
 }
+
+fn test_btype_imm() {
+	test_cases := [
+		[0b1_110011 << 25 | 0b10001 << 7, 0b111_1_1_110011_1000_0],
+	]
+	for i in 0 .. test_cases.len {
+		inst := u32(test_cases[i][0])
+		b := BType{InstructionBase{inst}}
+		ans := u32(i32(i16(test_cases[i][1])))
+		assert b.imm() == ans
+	}
+}
