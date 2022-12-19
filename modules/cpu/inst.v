@@ -6,6 +6,7 @@ const (
 	b5mask      = u8(0b11111)
 	b6mask      = u8(0b111111)
 	b7mask      = u8(0b1111111)
+	b8mask      = u32(0b11111111)
 	b10mask     = u32(0x3ff)
 	b11mask     = u32(0x7ff)
 	upper7mask  = u32(0xfe00_0000)
@@ -133,6 +134,5 @@ struct JType {
 }
 
 fn (j JType) imm() u32 {
-	// TODO: sign extend
-	return u32(int(j.i & u32(0x8000_0000)) >> 11) | j.i & u32(0x000f_f000) | ((j.i >> 20) & 0b1) << 11 | (j.i >> 20) & (cpu.b10mask << 1)
+	return u32(int(j.i & (1 << 31)) >> 11) | u32(j.i & (cpu.b10mask << 21)) >> 20 | u32((j.i >> 9) & (1 << 11)) | j.i & (cpu.b8mask << 12)
 }

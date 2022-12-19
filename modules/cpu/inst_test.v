@@ -2,18 +2,16 @@ module cpu
 
 fn test_jtype() {
 	test_cases := [
-		0
+		[0b1 << 31 | 0b1110001110 << 21 | 0b1 << 20 | 0b00110011 << 12,
+			0b1111_1111_1111 << 20 | 0b00110011 << 12 | 0b1 << 11 | 0b1110001110 << 1]
 		// cannot compile due to V compiler bug: https://github.com/vlang/v/issues/16705
-		// u32(0b1_1110001110_0_00110011) << 12
-	]
-	answers := [
-		0
-		// 0b1111_1111_1111_00110011_0_1110001110
+		// u32(0b1_1110001110_1_00110011) << 12, 0b1111_1111_1111_00110011_1_1110001110
 	]
 	for i in 0 .. test_cases.len {
-		inst := test_cases[i]
-		j := JType{InstructionBase{i}}
-		assert j.imm() == answers[i]
+		inst := u32(test_cases[i][0])
+		j := JType{InstructionBase{inst}}
+		ans := u32(test_cases[i][1])
+		assert j.imm() == ans
 	}
 }
 
