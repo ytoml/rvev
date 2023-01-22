@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths:
+      - "**.v"
+      - v.mod
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V
+        uses: actions/checkout@v2
+        with:
+          repository: vlang/v
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build V
+        run: make
+      - name: Format
+        run: ./v fmt -verify .
+      - name: Test
+        run: ./v test .

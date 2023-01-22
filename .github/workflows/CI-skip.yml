@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.v"
+      - v.mod
+
+jobs:
+  test-skip:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'No changes on v files'
