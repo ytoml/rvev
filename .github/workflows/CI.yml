@@ -8,20 +8,24 @@ on:
     paths:
       - "**.v"
       - v.mod
+env:
+  MAIN: rvev.v
+  MODULES: modules
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Checkout V
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: vlang/v
-      - name: Checkout repository
-        uses: actions/checkout@v2
+          path: vlang/v
       - name: Build V
-        run: make
+        run: cd vlang/v && make
       - name: Format
-        run: ./v fmt -verify .
+        run: vlang/v/v fmt -verify $MODULES $MAIN
       - name: Test
-        run: ./v test .
+        run: vlang/v/v test $MODULES
